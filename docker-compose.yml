@@ -1,0 +1,23 @@
+services:
+  gitea:
+    image: gitea/gitea:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    volumes:
+      - ./gitea-data:/data
+
+  act-runner:
+    container_name: gitea-runner
+    restart: always
+    depends_on:
+      - gitea
+    image: gitea/act_runner:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./runner-data:/data
+    environment:
+      - GITEA_RUNNER_REGISTRATION_TOKEN=U1LA5hUsdNvAeWec8QyUloanpiK94KWmU5eHFb4a
+      - GITEA_INSTANCE_URL=http://gitea:3000
+      - GITEA_RUNNER_NAME=runner
