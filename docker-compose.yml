@@ -5,8 +5,16 @@ services:
     ports:
       - "3000:3000"
       - "2222:22"
+    networks:
+      - gitea-net
     volumes:
       - ./gitea-data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/v1/version" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   act-runner:
     container_name: gitea-runner
@@ -21,3 +29,26 @@ services:
       - GITEA_RUNNER_REGISTRATION_TOKEN=U1LA5hUsdNvAeWec8QyUloanpiK94KWmU5eHFb4a
       - GITEA_INSTANCE_URL=http://gitea:3000
       - GITEA_RUNNER_NAME=runner
+    networks:
+      - gitea-net
+
+  log-analyzer:
+    container_name: gitea-log-analyzer
+    build: ./LogAnalyzer
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=INFO
+    networks:
+      - gitea-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  gitea-net:
+    driver: bridge
