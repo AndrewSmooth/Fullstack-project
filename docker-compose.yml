@@ -1,4 +1,18 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ci_ai_user
+      POSTGRES_PASSWORD: ci_ai_password
+      POSTGRES_DB: ci_ai_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - gitea-net
+
   gitea:
     image: gitea/gitea:latest
     restart: unless-stopped
@@ -52,3 +66,6 @@ services:
 networks:
   gitea-net:
     driver: bridge
+
+volumes:
+  postgres_data:
